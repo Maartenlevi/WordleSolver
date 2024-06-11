@@ -1,53 +1,102 @@
 from database_connection import connect, close
+import time
+from collections import defaultdict
 
-def get_word_by_index(index):
-    # Connect to the database
+def get_all_words():
     conn, cursor = connect()
-
-    # get the word and letters from the database with the given index
-    cursor.execute(
-        "SELECT * FROM Words WHERE id = %s",
-        (index,)
-    )
-    word = cursor.fetchone()
-
-
-    # Close the cursor and connection
+    cursor.execute("SELECT id, word FROM Words")
+    words = cursor.fetchall()
     close(conn)
+    return words
 
-    return word #output: (217, 'blend', 'b', 'l', 'e', 'n', 'd')
+def compare_wordle(guess, target):
+    result = [0] * len(guess)
+    target_list = list(target)
 
-def compare_words(word, guess):
-    """
-    Check how many elements in the guess are in the correct position and how many are in the wrong position.
-
-    Args:
-        word (list): The word to compare to.
-        guess (list): The guess to compare.
-
-    Returns:
-        tuple: The number of correct elements in the correct position and the number of correct elements in the wrong position.
-    """
-    correct_position = 0
-    wrong_position = 0
-    word_copy = list(word[1:])
-
-    # Check for correct elements in the correct position
-    for i in range(len(word[1:])):
-        if word[1:][i] == guess[i]:
-            correct_position += 1
-            word_copy[i] = None
-
-    # Check for correct elements in the wrong position
+    # First pass: identify correct positions
     for i in range(len(guess)):
-        if guess[i] != word[1:][i] and guess[i] in word_copy:
-            wrong_position += 1
-            word_copy.remove(guess[i])
+        if guess[i] == target[i]:
+            result[i] = 2
+            target_list[i] = None  # Mark this letter as used
 
-    return correct_position, wrong_position
-def first_guess(starting_word):
+    # Second pass: identify letters in the wrong positions
+    for i in range(len(guess)):
+        if result[i] == 0 and guess[i] in target_list:
+            result[i] = 1
+            target_list[target_list.index(guess[i])] = None  # Mark this letter as used
 
+    return result
 
+def filter_possible_words(possible_words, guess, feedback):
+    filtered_words = []
 
+    # Loop through each word in the possible words list
+    for word in possible_words:
+        # Compare the word with the guess to get feedback
+        word_feedback = compare_wordle(guess, word)
 
+        # If the feedback matches the provided feedback, add the word to the filtered list
+        if word_feedback == feedback:
+            filtered_words.append(word)
 
+    return filtered_words
+
+def minimax_score(possible_words, guess):
+    feedback_counts = defaultdict(int)
+
+    for word in possible_words:
+        feedback = tuple(compare_wordle(guess, word))
+        feedback_counts[feedback] += 1
+
+    return max(feedback_counts.values())
+
+def select_best_guess(possible_words):
+    best_guess = None
+    best_score = float('inf')
+
+    for guess in possible_words:
+        score = minimax_score(possible_words, guess)
+        if score < best_score:
+            best_score = score
+            best_guess = guess
+
+    return best_guess
+
+def main(starting_word):
+    start_time = time.time()
+
+    # Load all words once
+    all_words = [word[1] for word in get_all_words()]
+    total_games = 2315  # Number of games to simulate
+    wins = 0
+
+    for word in all_words:
+        target = word
+        guess = starting_word
+        possible_words = all_words
+
+        for guess_count in range(6):  # Allow up to 6 guesses
+            feedback = compare_wordle(guess, target)
+            if guess == target:
+                wins += 1
+                break
+
+            possible_words = filter_possible_words(possible_words, guess, feedback)
+            if not possible_words:
+                print(f"No possible words found for target '{target}'. There might be an error in the filtering logic.\n")
+                break
+
+            guess = select_best_guess(possible_words)
+
+    end_time = time.time()
+    runtime = end_time - start_time
+    win_rate = wins / total_games * 100
+
+    print(f"Starting word: {starting_word}")
+    print(f"Number of wins: {wins}")
+    print(f"Win rate: {win_rate:.2f}%")
+    print(f"Amount of games played: {total_games}")
+    print(f"Execution time: {runtime:.2f} seconds")
+
+# Run the main function with the starting word 'salet'
+main("fuzzy")
