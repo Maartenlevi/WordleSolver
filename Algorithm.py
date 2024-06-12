@@ -2,12 +2,14 @@ from database_connection import connect, close
 import time
 from collections import defaultdict
 
+
 def get_all_words():
     conn, cursor = connect()
     cursor.execute("SELECT id, word FROM Words")
     words = cursor.fetchall()
     close(conn)
     return words
+
 
 def compare_wordle(guess, target):
     result = [0] * len(guess)
@@ -27,6 +29,7 @@ def compare_wordle(guess, target):
 
     return result
 
+
 def filter_possible_words(possible_words, guess, feedback):
     filtered_words = []
 
@@ -41,6 +44,7 @@ def filter_possible_words(possible_words, guess, feedback):
 
     return filtered_words
 
+
 def minimax_score(possible_words, guess):
     feedback_counts = defaultdict(int)
 
@@ -49,6 +53,7 @@ def minimax_score(possible_words, guess):
         feedback_counts[feedback] += 1
 
     return max(feedback_counts.values())
+
 
 def select_best_guess(possible_words):
     best_guess = None
@@ -62,41 +67,82 @@ def select_best_guess(possible_words):
 
     return best_guess
 
+
 def main(starting_word):
-    start_time = time.time()
+    # check if the starting word is already in the database
+    conn, cursor = connect()
+    cursor.execute("SELECT starting_word FROM statistics WHERE starting_word = %s", (starting_word,))
+    if cursor.fetchone() is None:
+        # Start the timer
+        start_time = time.time()
 
-    # Load all words once
-    all_words = [word[1] for word in get_all_words()]
-    total_games = 2315  # Number of games to simulate
-    wins = 0
+        # Load all words once
+        all_words = [word[1] for word in get_all_words()]
 
-    for word in all_words:
-        target = word
-        guess = starting_word
-        possible_words = all_words
+        # Initialize variables
+        total_games = 0
+        wins = 0
+        turns = 0
+        median_turns = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+        starting_word_eliminations = 0
 
-        for guess_count in range(6):  # Allow up to 6 guesses
-            feedback = compare_wordle(guess, target)
-            if guess == target:
-                wins += 1
-                break
+        for word in all_words:
+            total_games += 1
+            target = word
+            guess = starting_word.lower()
+            possible_words = all_words
 
-            possible_words = filter_possible_words(possible_words, guess, feedback)
-            if not possible_words:
-                print(f"No possible words found for target '{target}'. There might be an error in the filtering logic.\n")
-                break
+            for guess_count in range(6):  # Allow up to 6 guesses
+                feedback = compare_wordle(guess, target)
+                if guess == target:
+                    wins += 1
+                    turns += guess_count + 1
+                    median_turns[guess_count + 1] += 1
+                    break
 
-            guess = select_best_guess(possible_words)
+                possible_words = filter_possible_words(possible_words, guess, feedback)
+                if guess_count == 0:
+                    starting_word_eliminations += len(possible_words)
+                if not possible_words:
+                    print(f"No possible words found for target '{target}'. There might be an error in the filtering logic.\n")
+                    break
 
-    end_time = time.time()
-    runtime = end_time - start_time
-    win_rate = wins / total_games * 100
+                guess = select_best_guess(possible_words)
 
-    print(f"Starting word: {starting_word}")
-    print(f"Number of wins: {wins}")
-    print(f"Win rate: {win_rate:.2f}%")
-    print(f"Amount of games played: {total_games}")
-    print(f"Execution time: {runtime:.2f} seconds")
+        end_time = time.time()
+        runtime = end_time - start_time
+        win_rate = wins / total_games * 100
+        # Calculate the median number of turns
+        median_turn = sorted(median_turns.items(), key=lambda x: x[1], reverse=True)[0][0]
+        starting_word_eliminations /= total_games
+
+        # add the results to the database
+        cursor.execute("INSERT INTO statistics (starting_word, total_games, wins, win_rate, average_turns, median_turns, execution_time, starting_word_eliminations) "
+                       "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (starting_word, total_games, wins, win_rate, turns / wins, median_turn, runtime, starting_word_eliminations))
+        conn.commit()
+        close(conn)
+
+        print(f"Starting word: {starting_word}")
+        print(f"Amount of games played: {total_games}")
+        print(f"Number of wins: {wins}")
+        print(f"Win rate: {win_rate:.2f}%")
+        print(f"Average number of turns: {turns / wins:.2f}")
+        print(f"Median number of turns: {median_turn}")
+
+        print(f"Execution time: {runtime:.2f} seconds\n")
+
+    else:
+        print(f"The starting word '{starting_word}' is already in the database.\n")
+        close(conn)
+
 
 # Run the main function with the starting word 'salet'
-main("fuzzy")
+starting_word = [
+    "Crane", "Arise", "Roate", "Media", "Canoe", "Store",
+    "Adieu", "Audio", "About", "Slate", "Crate", "Tales", "Slice",
+    "Trace", "Roast", "Aisle", "Stare", "Salet", "Least", "Soare",
+    "Sauce"
+]
+
+for word in starting_word:
+    main(word)
