@@ -68,7 +68,9 @@ def select_best_guess(possible_words):
     return best_guess
 
 
-def main(starting_word):
+def main(starting_words):
+    # make sure the first letter is uppercase
+    starting_word = starting_words.capitalize()
     # check if the starting word is already in the database
     conn, cursor = connect()
     cursor.execute("SELECT starting_word FROM statistics WHERE starting_word = %s", (starting_word,))
@@ -85,6 +87,7 @@ def main(starting_word):
         turns = 0
         median_turns = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
         starting_word_eliminations = 0
+        amount_words = len(all_words)
 
         for word in all_words:
             total_games += 1
@@ -108,6 +111,9 @@ def main(starting_word):
                     break
 
                 guess = select_best_guess(possible_words)
+            # make a progress bar in percentages but only print it every 5%
+            if total_games % (amount_words // 10) == 0:
+                print(f"{total_games / amount_words * 100:.0f}% of the words have been processed.")
 
         end_time = time.time()
         runtime = end_time - start_time
@@ -116,9 +122,24 @@ def main(starting_word):
         median_turn = sorted(median_turns.items(), key=lambda x: x[1], reverse=True)[0][0]
         starting_word_eliminations /= total_games
 
-        # add the results to the database
-        cursor.execute("INSERT INTO statistics (starting_word, total_games, wins, win_rate, average_turns, median_turns, execution_time, starting_word_eliminations) "
-                       "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (starting_word, total_games, wins, win_rate, turns / wins, median_turn, runtime, starting_word_eliminations))
+        # Prepare the values for wins on each turn
+        wins_turn_1 = median_turns[1]
+        wins_turn_2 = median_turns[2]
+        wins_turn_3 = median_turns[3]
+        wins_turn_4 = median_turns[4]
+        wins_turn_5 = median_turns[5]
+        wins_turn_6 = median_turns[6]
+
+        # Add the results to the database
+        cursor.execute("""
+            INSERT INTO statistics (
+                starting_word, total_games, wins, win_rate, average_turns, median_turns, execution_time, starting_word_eliminations,
+                wins_turn_1, wins_turn_2, wins_turn_3, wins_turn_4, wins_turn_5, wins_turn_6
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+            starting_word, total_games, wins, win_rate, turns / wins, median_turn, runtime, starting_word_eliminations,
+            wins_turn_1, wins_turn_2, wins_turn_3, wins_turn_4, wins_turn_5, wins_turn_6
+        ))
         conn.commit()
         close(conn)
 
@@ -128,8 +149,9 @@ def main(starting_word):
         print(f"Win rate: {win_rate:.2f}%")
         print(f"Average number of turns: {turns / wins:.2f}")
         print(f"Median number of turns: {median_turn}")
-
-        print(f"Execution time: {runtime:.2f} seconds\n")
+        print(f"Starting word eliminations: {amount_words - starting_word_eliminations}")
+        print(f"Average execution time: {runtime / amount_words:.2f} seconds")
+        print(f"Total execution time: {runtime:.2f} seconds\n")
 
     else:
         print(f"The starting word '{starting_word}' is already in the database.\n")
@@ -141,7 +163,7 @@ starting_word = [
     "Crane", "Arise", "Roate", "Media", "Canoe", "Store",
     "Adieu", "Audio", "About", "Slate", "Crate", "Tales", "Slice",
     "Trace", "Roast", "Aisle", "Stare", "Salet", "Least", "Soare",
-    "Sauce"
+    "Sauce", 'stone', "irate"
 ]
 
 for word in starting_word:
