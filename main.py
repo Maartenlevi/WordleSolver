@@ -66,62 +66,6 @@ def load_letter_heatmap():
             print(e)
     return None
 
-def on_enter(event):
-    starting_word = starting_word_entry.get()
-    starting_word = starting_word.capitalize()
-
-    if starting_word and starting_word != "Input a starting word...":
-        graph_image = load_graph(starting_word)
-        ranking_list, amount_of_words = load_ranking_list(starting_word)
-        general_statistics = load_general_statistics(starting_word)
-        letter_heatmap = load_letter_heatmap()
-
-        if graph_image:
-            # Display the graph image in one of the rectangles (example: rectangle1)
-            display_graph(graph_image, rectangle1)  # Modify to display in other rectangles as needed
-
-        if ranking_list:
-            # Display the ranking list in another rectangle (example: rectangle2)
-            display_ranking_list(ranking_list, amount_of_words, rectangle2)
-
-        if general_statistics:
-            # Display the general statistics in another rectangle (example: rectangle3)
-            display_general_statistics(general_statistics)
-
-        if letter_heatmap:
-            # Display the letter heatmap in another rectangle (example: rectangle3)
-            display_graph(letter_heatmap, rectangle3)
-
-        else:
-            # Run the algorithm if data is not available
-            algorithm(starting_word)
-            graph_image = load_graph(starting_word)
-            display_ranking_list(ranking_list, amount_of_words, rectangle2)
-            display_general_statistics(general_statistics, top_rectangle)
-            display_letter_heatmap(letter_heatmap, rectangle3)
-
-
-            if graph_image:
-                # Display the graph image in one of the rectangles
-                display_graph(graph_image, rectangle1)  # Modify to display in other rectangles as needed
-
-            if ranking_list:
-                # Display the ranking list in another rectangle (example: rectangle2)
-                display_ranking_list(ranking_list, amount_of_words, rectangle2)
-
-            if general_statistics:
-                # Display the general statistics in another rectangle (example: rectangle3)
-                display_general_statistics(general_statistics)
-
-            if letter_heatmap:
-                # Display the letter heatmap in another rectangle (example: rectangle3)
-                display_graph(letter_heatmap, rectangle3)
-
-    # Reset the entry field to placeholder text and color
-    starting_word_entry.delete(0, tk.END)
-    starting_word_entry.insert(0, "")
-    starting_word_entry.config(fg='#4d4d4d')
-
 
 def display_graph(graph_image, frame):
     # Clear previous contents of the frame (if any)
@@ -208,6 +152,63 @@ def display_letter_heatmap(letter_heatmap):
     graph_label = tk.Label(rectangle3, image=letter_heatmap)
     graph_label.image = letter_heatmap  # Keep reference to prevent garbage collection
     graph_label.pack(fill="both", expand=True)  # Adjust packing based on your layout
+
+
+def on_enter(event):
+    starting_word = starting_word_entry.get()
+    starting_word = starting_word.capitalize()
+
+    if starting_word and starting_word != "Input a starting word...":
+        graph_image = load_graph(starting_word)
+        ranking_list, amount_of_words = load_ranking_list(starting_word)
+        general_statistics = load_general_statistics(starting_word)
+        letter_heatmap = load_letter_heatmap()
+
+        if graph_image:
+            # Display the graph image in one of the rectangles (example: rectangle1)
+            display_graph(graph_image, rectangle1)  # Modify to display in other rectangles as needed
+
+        if ranking_list:
+            # Display the ranking list in another rectangle (example: rectangle2)
+            display_ranking_list(ranking_list, amount_of_words, rectangle2)
+
+        if general_statistics:
+            # Display the general statistics in another rectangle (example: rectangle3)
+            display_general_statistics(general_statistics)
+
+        if letter_heatmap:
+            # Display the letter heatmap in another rectangle (example: rectangle3)
+            display_graph(letter_heatmap, rectangle3)
+
+        else:
+            # Run the algorithm if data is not available
+            algorithm(starting_word)
+            graph_image = load_graph(starting_word)
+            display_ranking_list(ranking_list, amount_of_words, rectangle2)
+            display_general_statistics(general_statistics, top_rectangle)
+            display_letter_heatmap(letter_heatmap, rectangle3)
+
+
+            if graph_image:
+                # Display the graph image in one of the rectangles
+                display_graph(graph_image, rectangle1)  # Modify to display in other rectangles as needed
+
+            if ranking_list:
+                # Display the ranking list in another rectangle (example: rectangle2)
+                display_ranking_list(ranking_list, amount_of_words, rectangle2)
+
+            if general_statistics:
+                # Display the general statistics in another rectangle (example: rectangle3)
+                display_general_statistics(general_statistics)
+
+            if letter_heatmap:
+                # Display the letter heatmap in another rectangle (example: rectangle3)
+                display_graph(letter_heatmap, rectangle3)
+
+    # Reset the entry field to placeholder text and color
+    starting_word_entry.delete(0, tk.END)
+    starting_word_entry.insert(0, "")
+    starting_word_entry.config(fg='#4d4d4d')
 
 
 # Create the main window
