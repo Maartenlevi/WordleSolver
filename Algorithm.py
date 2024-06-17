@@ -68,7 +68,7 @@ def select_best_guess(possible_words):
     return best_guess
 
 
-def main(starting_words):
+def algorithm(starting_words):
     # make sure the first letter is uppercase
     starting_word = starting_words.capitalize()
     # check if the starting word is already in the database
@@ -166,5 +166,5 @@ starting_word = [
     "Sauce", 'stone', "irate"
 ]
 
-for word in starting_word:
-    main(word)
+#for word in starting_word:
+    #algorithm(word)
