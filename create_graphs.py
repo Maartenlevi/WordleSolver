@@ -2,12 +2,15 @@ from database_connection import connect, close
 import matplotlib.pyplot as plt
 import os
 from Algorithm import algorithm
+from matplotlib.colors import LinearSegmentedColormap
+import seaborn as sns
 
 
 # Define Wordle colors
 wordle_green = '#6aaa64'
 wordle_yellow = '#c9b458'
 wordle_gray = '#D9D9D9'
+
 
 def create_general_statistics(starting_word):
     # make sure the first letter is uppercase
@@ -35,13 +38,15 @@ def create_general_statistics(starting_word):
     general_statistics.append(average_execution_time)
 
     return general_statistics
+
+
 def create_ranking(starting_word):
     conn, cursor = connect()
 
     # Get the ranking of all starting words
     cursor.execute("""
            SELECT starting_word, win_rate, average_turns, starting_word_eliminations,
-                  ROW_NUMBER() OVER (ORDER BY win_rate DESC, average_turns, starting_word_eliminations) AS rank
+                  ROW_NUMBER() OVER (ORDER BY average_turns, starting_word_eliminations, win_rate DESC) AS rank
            FROM statistics
        """)
 
@@ -80,14 +85,12 @@ def create_ranking(starting_word):
     return formatted_ranking_list, amount_words
 
 
-
 def create_wins_on_turns_graph(data, starting_word):
     # Get the number of wins for each turn
     wins = {1: data[8], 2: data[9], 3: data[10], 4: data[11], 5: data[12], 6: data[13]}
     turns = list(wins.keys())
     num_wins = list(wins.values())
     average = data[2]
-
 
     # Create the figure and axis with a size of 540x590 pixels
     fig, ax = plt.subplots(figsize=(500 / 100, 500 / 100), dpi=100)
@@ -102,13 +105,13 @@ def create_wins_on_turns_graph(data, starting_word):
     plt.text(float(average) + 0.1, max(num_wins) / 2, f'{average:.2f}', color='black', fontsize=10)
 
     # Add labels and title
-    plt.xlabel('Number of turns', color='black')
-    plt.ylabel('Number of wins', color='black')
-    plt.title('Number of wins for turns', color='black')
+    plt.xlabel('Number of turns', color='black', fontsize=10, fontweight='bold')
+    plt.ylabel('Number of wins', color='black', fontsize=10, fontweight='bold')
+    plt.title('Number of wins for turns', color='black', fontsize=10, fontweight='bold', loc='center')
 
     # Customize ticks
-    ax.tick_params(axis='x', colors='black')
-    ax.tick_params(axis='y', colors='black')
+    ax.tick_params(axis='x', colors='black', labelsize=8)
+    ax.tick_params(axis='y', colors='black', labelsize=8)
 
     # Add horizontal grid lines
     plt.grid(True, which='major', linestyle='--', linewidth=0.5, color='black', alpha=0.7, axis='y')
@@ -118,7 +121,7 @@ def create_wins_on_turns_graph(data, starting_word):
         height = bar.get_height()
         ax.annotate(f'{height}',
                     xy=(bar.get_x() + bar.get_width() / 2, height + 20),
-                    ha='center', va='center', color='black', fontsize=10)
+                    ha='center', va='center', color='black', fontsize=10, fontweight='bold')
 
     # add a legend
     plt.legend(['Average number of turns', 'Number of wins'], loc='upper left', fontsize='small', facecolor=wordle_gray)
@@ -129,6 +132,56 @@ def create_wins_on_turns_graph(data, starting_word):
     # Save the plot in the Graphs folder in the data folder
     fig.savefig(f'Data/Graphs/{starting_word}_wins_on_turns.png')
 
+
+def create_letter_heatmap():
+    # get the information from the database
+    conn, cursor = connect()
+    cursor.execute("SELECT * FROM statistics2")
+
+    # get the data and put it into a list
+    data = cursor.fetchall()
+
+    close(conn)
+
+    # Create a dictionary with the letters as keys and the frequency of the letters in each position as values
+    letters = []
+    heatmap_data = []
+    for row in data:
+        letters.append(row[0])
+        heatmap_data.append(row[1:])
+
+    # Create the figure and axis with a size of 500x500 pixels
+    fig, ax = plt.subplots(figsize=(500 / 100, 500 / 100), dpi=100)
+    fig.patch.set_facecolor(wordle_gray)
+    ax.set_facecolor('white')
+
+    # Create the heatmap
+    heatmap = ax.imshow(heatmap_data, cmap='Greens', aspect='auto')
+
+    # Add labels and title
+    plt.xlabel('Position', color='black', fontsize=10,)
+    plt.ylabel('Letter', color='black', fontsize=10)
+    plt.title('Frequency of letters in each position', color='black', fontsize=10, fontweight='bold', loc = "center")
+
+    # Customize ticks
+    ax.set_xticks(range(5))
+    ax.set_xticklabels(range(1, 6), fontsize=8, fontweight='bold')
+    ax.set_yticks(range(26))
+    ax.set_yticklabels(letters, fontsize=8, fontweight='bold')
+
+    # Rotate the x-axis labels
+    plt.xticks(rotation=0)
+
+    # Add a colorbar
+    plt.colorbar(heatmap)
+
+    # Adjust layout to make it fit better
+    plt.tight_layout()
+
+    # Save the plot in the Graphs folder in the data folder
+    fig.savefig('Data/Graphs/letter_heatmap.png')
+
+
 def create_graphs(starting_word):
     # make sure the first letter is uppercase
     starting_word = starting_word.capitalize()
@@ -136,7 +189,6 @@ def create_graphs(starting_word):
     # get the information from the database
     conn, cursor = connect()
     cursor.execute("SELECT * FROM statistics WHERE starting_word = %s", (starting_word,))
-
 
     # get the data and put it into a list
     data = cursor.fetchone()
@@ -151,6 +203,8 @@ def create_graphs(starting_word):
 
     # check if the graphs are already in the Graphs folder and if it does return the graphs
     if os.path.exists(f'Data/Graphs/{starting_word}_wins_on_turns.png'):
-        file_path = f'Data/Graphs/{starting_word}_wins_on_turns.png'
+        pass
     else:
         create_wins_on_turns_graph(data, starting_word)
+
+create_letter_heatmap()

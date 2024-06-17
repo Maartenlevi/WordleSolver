@@ -1,6 +1,6 @@
 import tkinter as tk
 import os
-from create_graphs import create_graphs, create_ranking, create_general_statistics
+from create_graphs import create_graphs, create_ranking, create_general_statistics, create_letter_heatmap
 from Algorithm import algorithm
 
 
@@ -50,6 +50,22 @@ def load_general_statistics(starting_word):
         print(e)
         return None
 
+def load_letter_heatmap():
+    # Check if the graph image exists
+    if os.path.exists(f'Data/Graphs/letter_heatmap.png'):
+        # Load the graph image
+        graph_image = tk.PhotoImage(file=f'Data/Graphs/letter_heatmap.png')
+        return graph_image
+    else:
+        # Create the graph image if it does not exist
+        try:
+            create_letter_heatmap()
+            graph_image = tk.PhotoImage(file=f'Data/Graphs/letter_heatmap.png')
+            return graph_image
+        except ValueError as e:
+            print(e)
+    return None
+
 def on_enter(event):
     starting_word = starting_word_entry.get()
     starting_word = starting_word.capitalize()
@@ -58,6 +74,7 @@ def on_enter(event):
         graph_image = load_graph(starting_word)
         ranking_list, amount_of_words = load_ranking_list(starting_word)
         general_statistics = load_general_statistics(starting_word)
+        letter_heatmap = load_letter_heatmap()
 
         if graph_image:
             # Display the graph image in one of the rectangles (example: rectangle1)
@@ -71,12 +88,18 @@ def on_enter(event):
             # Display the general statistics in another rectangle (example: rectangle3)
             display_general_statistics(general_statistics)
 
+        if letter_heatmap:
+            # Display the letter heatmap in another rectangle (example: rectangle3)
+            display_graph(letter_heatmap, rectangle3)
+
         else:
             # Run the algorithm if data is not available
             algorithm(starting_word)
             graph_image = load_graph(starting_word)
             display_ranking_list(ranking_list, amount_of_words, rectangle2)
             display_general_statistics(general_statistics, top_rectangle)
+            display_letter_heatmap(letter_heatmap, rectangle3)
+
 
             if graph_image:
                 # Display the graph image in one of the rectangles
@@ -89,6 +112,10 @@ def on_enter(event):
             if general_statistics:
                 # Display the general statistics in another rectangle (example: rectangle3)
                 display_general_statistics(general_statistics)
+
+            if letter_heatmap:
+                # Display the letter heatmap in another rectangle (example: rectangle3)
+                display_graph(letter_heatmap, rectangle3)
 
     # Reset the entry field to placeholder text and color
     starting_word_entry.delete(0, tk.END)
@@ -128,8 +155,8 @@ def display_ranking_list(ranking_list, amount_of_words, frame):
     amount_label.pack(fill="x", pady=10, padx=10)
 
     # create a label on the bottom left saying what the ranking is based on
-    description_label = tk.Label(frame, text="Based on: \nthe number of wins, "
-                                             "\naverage amount of guesses needed to win and how many words are "
+    description_label = tk.Label(frame, text="Based on: \naverage amount of guesses needed to win,\n"
+                                             "the win rate and how many words are "
                                              "\nstill possible after the first turn",
                                  bg='#D9D9D9', font=('Inter', 10, 'italic'), anchor='w', justify='left')
     description_label.pack(fill="x", pady=10, padx=10)
@@ -150,6 +177,7 @@ def display_general_statistics(general_statistics):
         widget.destroy()
 
     general_statistics = general_statistics
+    percentage_of_words_eliminated = round((general_statistics[5] - general_statistics[3]) / general_statistics[5] * 100, 2)
     # Create a label for the statistics title
     title_label = tk.Label(title_rectangle, text="General statistics:", bg='#D9D9D9', font=('Inter', 20, "bold"),
                            anchor='center', justify='left')
@@ -161,15 +189,25 @@ def display_general_statistics(general_statistics):
                                 bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
     statistic1_label.pack(fill="x", pady=5, padx=10)
 
-    statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {general_statistics[3]}\n"
+    statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {percentage_of_words_eliminated}%\n"
                                             f"Median number of turns: {general_statistics[2]}",
                                 bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
     statistic2_label.pack(fill="x", pady=5, padx=10)
 
-    statistic3_label = tk.Label(top_rectangle3, text=f"Average execution time: {round(general_statistics[6],3)} seconds\n"
+    statistic3_label = tk.Label(top_rectangle3, text=f"Average execution time per game: {round(general_statistics[6],3)} seconds\n"
                                             f"Total execution time: {round(general_statistics[4])} seconds",
                                 bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
     statistic3_label.pack(fill="x", pady=5, padx=10)
+
+def display_letter_heatmap(letter_heatmap):
+    # Clear previous contents of the frame (if any)
+    for widget in rectangle3.winfo_children():
+        widget.destroy()
+
+    # Create a label to display the graph image
+    graph_label = tk.Label(rectangle3, image=letter_heatmap)
+    graph_label.image = letter_heatmap  # Keep reference to prevent garbage collection
+    graph_label.pack(fill="both", expand=True)  # Adjust packing based on your layout
 
 
 # Create the main window

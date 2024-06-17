@@ -112,7 +112,7 @@ def algorithm(starting_words):
 
                 guess = select_best_guess(possible_words)
             # make a progress bar in percentages but only print it every 5%
-            if total_games % (amount_words // 10) == 0:
+            if total_games % (amount_words // 5) == 0:
                 print(f"{total_games / amount_words * 100:.0f}% of the words have been processed.")
 
         end_time = time.time()
@@ -143,28 +143,13 @@ def algorithm(starting_words):
         conn.commit()
         close(conn)
 
-        print(f"Starting word: {starting_word}")
-        print(f"Amount of games played: {total_games}")
-        print(f"Number of wins: {wins}")
-        print(f"Win rate: {win_rate:.2f}%")
-        print(f"Average number of turns: {turns / wins:.2f}")
-        print(f"Median number of turns: {median_turn}")
-        print(f"Starting word eliminations: {amount_words - starting_word_eliminations}")
-        print(f"Average execution time: {runtime / amount_words:.2f} seconds")
-        print(f"Total execution time: {runtime:.2f} seconds\n")
-
     else:
-        print(f"The starting word '{starting_word}' is already in the database.\n")
         close(conn)
 
 
-# Run the main function with the starting word 'salet'
-starting_word = [
-    "Crane", "Arise", "Roate", "Media", "Canoe", "Store",
-    "Adieu", "Audio", "About", "Slate", "Crate", "Tales", "Slice",
-    "Trace", "Roast", "Aisle", "Stare", "Salet", "Least", "Soare",
-    "Sauce", 'stone', "irate"
-]
+# List of starting words to test
+#starting_word = get_all_words()
 
 #for word in starting_word:
-    #algorithm(word)
+    #print(f"Processing starting word: {word[1]}")
+    #algorithm(word[1])
