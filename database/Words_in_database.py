@@ -33,4 +33,4 @@ def main(file_path):
     # Close the cursor and connection
     close(conn)
 
-main('C:/Users/meijg/PycharmProjects/WordleSolver/Data/words.txt')
+main('/database/words.txt')

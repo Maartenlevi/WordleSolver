@@ -34,6 +34,7 @@ def load_graph(starting_word):
             print(e)
     return None
 
+
 def load_ranking_list(starting_word):
     try:
         ranking_list, amount_of_words = create_ranking(starting_word)
@@ -42,6 +43,7 @@ def load_ranking_list(starting_word):
         print(e)
         return None
 
+
 def load_general_statistics(starting_word):
     try:
         general_statistics = create_general_statistics(starting_word)
@@ -49,6 +51,7 @@ def load_general_statistics(starting_word):
     except ValueError as e:
         print(e)
         return None
+
 
 def load_letter_heatmap():
     # Check if the graph image exists
@@ -77,6 +80,7 @@ def display_graph(graph_image, frame):
     graph_label.image = graph_image  # Keep reference to prevent garbage collection
     graph_label.pack(fill="both", expand=True)  # Adjust packing based on your layout
 
+
 def display_ranking_list(ranking_list, amount_of_words, frame):
     # Clear previous contents of the frame (if any)
     for widget in frame.winfo_children():
@@ -90,7 +94,7 @@ def display_ranking_list(ranking_list, amount_of_words, frame):
     # Create a label for each ranking entry with the actual rank
     for starting_word in ranking_list:
         rank_label = tk.Label(frame, text=f"{starting_word[0]}. {starting_word[1]}", bg='#D9D9D9',
-                              font=('Inter', 20,"italic"), anchor='center', justify='left')
+                              font=('Inter', 20, "italic"), anchor='center', justify='left')
         rank_label.pack(fill="x", pady=10)
 
     # create a label on the bottom right saying how many words are in the ranking
@@ -99,9 +103,9 @@ def display_ranking_list(ranking_list, amount_of_words, frame):
     amount_label.pack(fill="x", pady=10, padx=10)
 
     # create a label on the bottom left saying what the ranking is based on
-    description_label = tk.Label(frame, text="Based on: \naverage amount of guesses needed to win,\n"
+    description_label = tk.Label(frame, text="Based on: \nAverage amount of guesses needed to win,\n"
                                              "the win rate and how many words are "
-                                             "\nstill possible after the first turn",
+                                             "\nstill possible after the first turn.",
                                  bg='#D9D9D9', font=('Inter', 10, 'italic'), anchor='w', justify='left')
     description_label.pack(fill="x", pady=10, padx=10)
 
@@ -129,19 +133,20 @@ def display_general_statistics(general_statistics):
 
     # Create a label for each statistic entry
     statistic1_label = tk.Label(top_rectangle1, text=f"Win rate: {general_statistics[0]}%\n"
-                                            f"Average amount of turns: {general_statistics[1]}",
+                                f"Average amount of turns: {general_statistics[1]}",
                                 bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
     statistic1_label.pack(fill="x", pady=5, padx=10)
 
     statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {percentage_of_words_eliminated}%\n"
-                                            f"Median number of turns: {general_statistics[2]}",
+                                f"Median number of turns: {general_statistics[2]}",
                                 bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
     statistic2_label.pack(fill="x", pady=5, padx=10)
 
-    statistic3_label = tk.Label(top_rectangle3, text=f"Average execution time per game: {round(general_statistics[6],3)} seconds\n"
-                                            f"Total execution time: {round(general_statistics[4])} seconds",
+    statistic3_label = tk.Label(top_rectangle3, text=f"Execution time per game: {round(general_statistics[6], 3)} seconds\n"
+                                f"Total execution time: {round(general_statistics[4])} seconds",
                                 bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
     statistic3_label.pack(fill="x", pady=5, padx=10)
+
 
 def display_letter_heatmap(letter_heatmap):
     # Clear previous contents of the frame (if any)
@@ -157,6 +162,10 @@ def display_letter_heatmap(letter_heatmap):
 def on_enter(event):
     starting_word = starting_word_entry.get()
     starting_word = starting_word.capitalize()
+
+    # check if the starting word is 5 characters long
+    if len(starting_word) != 5:
+        return
 
     if starting_word and starting_word != "Input a starting word...":
         graph_image = load_graph(starting_word)
@@ -185,9 +194,8 @@ def on_enter(event):
             algorithm(starting_word)
             graph_image = load_graph(starting_word)
             display_ranking_list(ranking_list, amount_of_words, rectangle2)
-            display_general_statistics(general_statistics, top_rectangle)
+            display_general_statistics(general_statistics)
             display_letter_heatmap(letter_heatmap, rectangle3)
-
 
             if graph_image:
                 # Display the graph image in one of the rectangles

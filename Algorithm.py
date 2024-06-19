@@ -1,6 +1,5 @@
 from database_connection import connect, close
 import time
-from collections import defaultdict
 
 
 def get_all_words():
@@ -46,11 +45,15 @@ def filter_possible_words(possible_words, guess, feedback):
 
 
 def minimax_score(possible_words, guess):
-    feedback_counts = defaultdict(int)
+    feedback_counts = {}
 
     for word in possible_words:
         feedback = tuple(compare_wordle(guess, word))
-        feedback_counts[feedback] += 1
+        if feedback in feedback_counts:
+            feedback_counts[feedback] += 1
+        else:
+            feedback_counts[feedback] = 1
+    # example: feedback_counts = {(2, 2, 2, 2, 2): 1, (2, 1, 0, 0, 0): 2, (0, 0, 0, 0, 0): 1}
 
     return max(feedback_counts.values())
 
@@ -69,6 +72,10 @@ def select_best_guess(possible_words):
 
 
 def algorithm(starting_words):
+    # check if the word is 5 characters long
+    if len(starting_words) != 5:
+        print("The starting word should be 5 characters long.")
+        return
     # make sure the first letter is uppercase
     starting_word = starting_words.capitalize()
     # check if the starting word is already in the database

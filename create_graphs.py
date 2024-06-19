@@ -2,9 +2,6 @@ from database_connection import connect, close
 import matplotlib.pyplot as plt
 import os
 from Algorithm import algorithm
-from matplotlib.colors import LinearSegmentedColormap
-import seaborn as sns
-
 
 # Define Wordle colors
 wordle_green = '#6aaa64'
