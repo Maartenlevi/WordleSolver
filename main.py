@@ -1,6 +1,6 @@
 import tkinter as tk
 import os
-from create_graphs import create_graphs, create_ranking, create_general_statistics, create_letter_heatmap
+from Data.create_graphs import create_graphs, create_ranking, create_general_statistics, create_letter_heatmap, create_brute_force_statistics
 from Algorithm import algorithm
 
 
@@ -52,6 +52,14 @@ def load_general_statistics(starting_word):
         print(e)
         return None
 
+
+def load_brute_force_statistics(starting_word):
+    try:
+        brute_force_statistics = create_brute_force_statistics(starting_word)
+        return brute_force_statistics
+    except ValueError as e:
+        print(e)
+        return None
 
 def load_letter_heatmap():
     # Check if the graph image exists
@@ -110,7 +118,7 @@ def display_ranking_list(ranking_list, amount_of_words, frame):
     description_label.pack(fill="x", pady=10, padx=10)
 
 
-def display_general_statistics(general_statistics):
+def display_general_statistics(general_statistics, brute_force_statistics):
     # Clear previous contents of the frame (if any)
     for widget in top_rectangle1.winfo_children():
         widget.destroy()
@@ -125,26 +133,29 @@ def display_general_statistics(general_statistics):
         widget.destroy()
 
     general_statistics = general_statistics
+    brute_force_statistics = brute_force_statistics
     percentage_of_words_eliminated = round((general_statistics[5] - general_statistics[3]) / general_statistics[5] * 100, 2)
+    percentage_of_words_eliminated_brute_force = round((brute_force_statistics[5] - brute_force_statistics[3]) / brute_force_statistics[5] * 100, 2)
+
     # Create a label for the statistics title
-    title_label = tk.Label(title_rectangle, text="General statistics:", bg='#D9D9D9', font=('Inter', 20, "bold"),
+    title_label = tk.Label(title_rectangle, text="General statistics(Minimax vs Brute Force):", bg='#D9D9D9', font=('Inter', 20, "bold"),
                            anchor='center', justify='left')
     title_label.pack(fill="x", pady=10)
 
     # Create a label for each statistic entry
-    statistic1_label = tk.Label(top_rectangle1, text=f"Win rate: {general_statistics[0]}%\n"
-                                f"Average amount of turns: {general_statistics[1]}",
-                                bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
+    statistic1_label = tk.Label(top_rectangle1, text=f"Win rate: {general_statistics[0]}%, {brute_force_statistics[0]}%, Δ is {brute_force_statistics[0] - general_statistics[0]}%\n"
+                                f"Average amount of turns: {general_statistics[1]}, {brute_force_statistics[1]}, Δ is {brute_force_statistics[1] - general_statistics[1]} turns",
+                                bg='#D9D9D9', font=('Inter', 10, "italic"), anchor='w', justify='left')
     statistic1_label.pack(fill="x", pady=5, padx=10)
 
-    statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {percentage_of_words_eliminated}%\n"
-                                f"Median number of turns: {general_statistics[2]}",
-                                bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
+    statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {percentage_of_words_eliminated}%, {percentage_of_words_eliminated_brute_force}%, Δ is {percentage_of_words_eliminated_brute_force - percentage_of_words_eliminated}%\n"
+                                f"Median number of turns: {general_statistics[2]}, {brute_force_statistics[2]}, Δ is {brute_force_statistics[2] - general_statistics[2]} turns",
+                                bg='#D9D9D9', font=('Inter', 10, "italic"), anchor='w', justify='left')
     statistic2_label.pack(fill="x", pady=5, padx=10)
 
-    statistic3_label = tk.Label(top_rectangle3, text=f"Execution time per game: {round(general_statistics[6], 3)} seconds\n"
-                                f"Total execution time: {round(general_statistics[4])} seconds",
-                                bg='#D9D9D9', font=('Inter', 13, "italic"), anchor='w', justify='left')
+    statistic3_label = tk.Label(top_rectangle3, text=f"Execution time per game: {round(general_statistics[6], 3)}s, {round(brute_force_statistics[6],3)}s, Δ is {round(brute_force_statistics[6],3) - round(general_statistics[6], 3)}s\n"
+                                f"Total execution time: {round(general_statistics[4])}s, {round(brute_force_statistics[4])}s, Δ is {round(brute_force_statistics[4]) - round(general_statistics[4])}s\n",
+                                bg='#D9D9D9', font=('Inter', 10, "italic"), anchor='w', justify='left')
     statistic3_label.pack(fill="x", pady=5, padx=10)
 
 
@@ -171,6 +182,7 @@ def on_enter(event):
         graph_image = load_graph(starting_word)
         ranking_list, amount_of_words = load_ranking_list(starting_word)
         general_statistics = load_general_statistics(starting_word)
+        brute_force_statistics = load_brute_force_statistics(starting_word)
         letter_heatmap = load_letter_heatmap()
 
         if graph_image:
@@ -183,7 +195,11 @@ def on_enter(event):
 
         if general_statistics:
             # Display the general statistics in another rectangle (example: rectangle3)
-            display_general_statistics(general_statistics)
+            display_general_statistics(general_statistics, brute_force_statistics)
+
+        if brute_force_statistics:
+            # Display the general statistics in another rectangle (example: rectangle3)
+            display_general_statistics(general_statistics, brute_force_statistics)
 
         if letter_heatmap:
             # Display the letter heatmap in another rectangle (example: rectangle3)
@@ -194,7 +210,7 @@ def on_enter(event):
             algorithm(starting_word)
             graph_image = load_graph(starting_word)
             display_ranking_list(ranking_list, amount_of_words, rectangle2)
-            display_general_statistics(general_statistics)
+            display_general_statistics(general_statistics, brute_force_statistics)
             display_letter_heatmap(letter_heatmap, rectangle3)
 
             if graph_image:

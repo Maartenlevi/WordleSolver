@@ -1,5 +1,6 @@
 import unittest
-from Algorithm import algorithm, compare_wordle, filter_possible_words, minimax_score, select_best_guess
+from Algorithm import compare_wordle, filter_possible_words, minimax_score, select_best_guess
+
 
 class Test_compare_wordle(unittest.TestCase):
     def test_compare_wordle(self):
@@ -37,13 +38,7 @@ class Test_minimax_score(unittest.TestCase):
 class Test_select_best_guess(unittest.TestCase):
     def test_select_best_guess(self):
         self.assertEqual(select_best_guess(['hello', 'world', 'steak']), 'hello')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'xxxxx']), 'xxxxx')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'hxxxx']), 'hxxxx')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'hxxex']), 'hxxex')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'hexxl']), 'hexxl')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'xhxxx']), 'xhxxx')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'ehxxx']), 'ehxxx')
-        self.assertEqual(select_best_guess(['hello', 'world', 'steak', 'ehlxx']), 'ehlxx')
+
 
 
 

@@ -2,6 +2,7 @@ from database_connection import connect, close
 import matplotlib.pyplot as plt
 import os
 from Algorithm import algorithm
+from Brute_force import brute_force
 
 # Define Wordle colors
 wordle_green = '#6aaa64'
@@ -36,6 +37,33 @@ def create_general_statistics(starting_word):
 
     return general_statistics
 
+
+def create_brute_force_statistics(starting_word):
+    # make sure the first letter is uppercase
+    starting_word = starting_word.capitalize()
+
+    # get the information from the database
+    conn, cursor = connect()
+    cursor.execute("SELECT win_rate, average_turns, median_turns, starting_word_eliminations, execution_time, total_games "
+                   "FROM brute_force_statistics WHERE starting_word = %s", (starting_word,))
+
+    # get the data and put it into a list
+    data = cursor.fetchone()
+    if data is None:
+        brute_force(starting_word)
+        cursor.execute("SELECT win_rate, average_turns, median_turns, starting_word_eliminations, execution_time, total_games "
+                       "FROM brute_force_statistics WHERE starting_word = %s", (starting_word,))
+        data = cursor.fetchone()
+
+    close(conn)
+    # put the data into a list
+    brute_force_statistics = []
+    for i in range(len(data)):
+        brute_force_statistics.append(data[i])
+    average_execution_time = data[4] / data[5]
+    brute_force_statistics.append(average_execution_time)
+
+    return brute_force_statistics
 
 def create_ranking(starting_word):
     conn, cursor = connect()
@@ -203,5 +231,3 @@ def create_graphs(starting_word):
         pass
     else:
         create_wins_on_turns_graph(data, starting_word)
-
-create_letter_heatmap()

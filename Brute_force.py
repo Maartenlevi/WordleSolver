@@ -1,86 +1,26 @@
+from Algorithm import compare_wordle, filter_possible_words, get_all_words
 from database_connection import connect, close
 import time
+import random
 
 
-def get_all_words():
-    conn, cursor = connect()
-    cursor.execute("SELECT id, word FROM words")
-    words = cursor.fetchall()
-    close(conn)
-    return words
+def get_guess(possible_words):
+    return random.choice(possible_words)
 
 
-def compare_wordle(guess, target):
-    result = [0] * len(guess)
-    target_list = list(target)
+def brute_force(starting_words):
 
-    # First pass: identify correct positions
-    for i in range(len(guess)):
-        if guess[i] == target[i]:
-            result[i] = 2
-            target_list[i] = None  # Mark this letter as used
-
-    # Second pass: identify letters in the wrong positions
-    for i in range(len(guess)):
-        if result[i] == 0 and guess[i] in target_list:
-            result[i] = 1
-            target_list[target_list.index(guess[i])] = None  # Mark this letter as used
-
-    return result
-
-
-def filter_possible_words(possible_words, guess, feedback):
-    filtered_words = []
-
-    # Loop through each word in the possible words list
-    for word in possible_words:
-        # Compare the word with the guess to get feedback
-        word_feedback = compare_wordle(guess, word)
-
-        # If the feedback matches the provided feedback, add the word to the filtered list
-        if word_feedback == feedback:
-            filtered_words.append(word)
-
-    return filtered_words
-
-
-def minimax_score(possible_words, guess):
-    feedback_counts = {}
-
-    for word in possible_words:
-        feedback = tuple(compare_wordle(guess, word))
-        if feedback in feedback_counts:
-            feedback_counts[feedback] += 1
-        else:
-            feedback_counts[feedback] = 1
-    # example: feedback_counts = {(2, 2, 2, 2, 2): 1, (2, 1, 0, 0, 0): 2, (0, 0, 0, 0, 0): 1}
-
-    return max(feedback_counts.values())
-
-
-def select_best_guess(possible_words):
-    best_guess = None
-    best_score = float('inf')
-
-    for guess in possible_words:
-        score = minimax_score(possible_words, guess)
-        if score < best_score:
-            best_score = score
-            best_guess = guess
-
-    return best_guess
-
-
-def algorithm(starting_words):
     # check if the word is 5 characters long
     if len(starting_words) != 5:
         print("The starting word should be 5 characters long.")
         return
+
     # make sure the first letter is uppercase
     starting_word = starting_words.capitalize()
+
     # check if the starting word is already in the database
     conn, cursor = connect()
-    cursor.execute("SELECT starting_word FROM statistics WHERE starting_word = %s", (starting_word,))
+    cursor.execute("SELECT starting_word FROM brute_force_statistics WHERE starting_word = %s", (starting_word,))
     if cursor.fetchone() is None:
         # Start the timer
         start_time = time.time()
@@ -94,7 +34,6 @@ def algorithm(starting_words):
         turns = 0
         median_turns = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
         starting_word_eliminations = 0
-        amount_words = len(all_words)
 
         for word in all_words:
             total_games += 1
@@ -117,10 +56,7 @@ def algorithm(starting_words):
                     print(f"No possible words found for target '{target}'. There might be an error in the filtering logic.\n")
                     break
 
-                guess = select_best_guess(possible_words)
-            # make a progress bar in percentages but only print it every 5%
-            if total_games % (amount_words // 5) == 0:
-                print(f"{total_games / amount_words * 100:.0f}% of the words have been processed.")
+                guess = get_guess(possible_words)
 
         end_time = time.time()
         runtime = end_time - start_time
@@ -139,7 +75,7 @@ def algorithm(starting_words):
 
         # Add the results to the database
         cursor.execute("""
-            INSERT INTO statistics (
+            INSERT INTO brute_force_statistics (
                 starting_word, total_games, wins, win_rate, average_turns, median_turns, execution_time, starting_word_eliminations,
                 wins_turn_1, wins_turn_2, wins_turn_3, wins_turn_4, wins_turn_5, wins_turn_6
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)

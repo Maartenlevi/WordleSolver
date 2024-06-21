@@ -33,4 +33,4 @@ def main(file_path):
     # Close the cursor and connection
     close(conn)
 
-main('/database/words.txt')
+main('Data/words.txt')

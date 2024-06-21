@@ -52,9 +52,17 @@ def create_letter_frequency():
 
     # loop through all the letters
     for letter in letters:
-        # get the frequency of the letter
-        letter_frequency = get_letter_frequency(letter)
-        # insert the data into the database
-        insert_data(letter, letter_frequency)
+        # check if the letter is in the database
+        conn, cursor = connect()
+        cursor.execute("SELECT letter FROM statistics2 WHERE letter = %s", (letter,))
+        if cursor.fetchone() is None:
+            # get the frequency of the letter
+            letter_frequency = get_letter_frequency(letter)
+            # insert the data into the database
+            insert_data(letter, letter_frequency)
+        else:
+            print(f"The letter '{letter}' is already in the database.")
+        close(conn)
+
 # Run the function to create the letter frequency table
 create_letter_frequency()
