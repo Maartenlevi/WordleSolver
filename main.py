@@ -1,16 +1,24 @@
 import tkinter as tk
 import os
 from Data.create_graphs import create_graphs, create_ranking, create_general_statistics, create_letter_heatmap, create_brute_force_statistics
-from Algorithm import algorithm
+from MiniMax import algorithm
+
+
+def clear_frame(frame):
+    """Clears all widgets (children) from a tkinter frame."""
+    for widget in frame.winfo_children():
+        widget.destroy()
 
 
 def on_focus_in(event):
+    """Clear the entry field when focused and change the text color."""
     if starting_word_entry.get() == "Input a starting word...":
         starting_word_entry.delete(0, tk.END)
         starting_word_entry.config(fg='black')
 
 
 def on_focus_out(event):
+    """Reset the entry field to placeholder text and color."""
     if starting_word_entry.get() == "" or starting_word_entry.get() == "Input a starting word...":
         starting_word_entry.delete(0, tk.END)
         starting_word_entry.insert(0, "Input a starting word...")
@@ -18,6 +26,7 @@ def on_focus_out(event):
 
 
 def load_graph(starting_word):
+    """Loads or creates a graph image based on the starting word."""
     starting_word = starting_word.capitalize()
     # Check if the graph image exists
     if os.path.exists(f'Data/Graphs/{starting_word}_wins_on_turns.png'):
@@ -36,6 +45,7 @@ def load_graph(starting_word):
 
 
 def load_ranking_list(starting_word):
+    """Loads or creates a ranking list based on the starting word."""
     try:
         ranking_list, amount_of_words = create_ranking(starting_word)
         return ranking_list, amount_of_words
@@ -45,6 +55,7 @@ def load_ranking_list(starting_word):
 
 
 def load_general_statistics(starting_word):
+    """Loads or creates general statistics based on the starting word."""
     try:
         general_statistics = create_general_statistics(starting_word)
         return general_statistics
@@ -54,6 +65,7 @@ def load_general_statistics(starting_word):
 
 
 def load_brute_force_statistics(starting_word):
+    """Loads or creates brute force statistics based on the starting word."""
     try:
         brute_force_statistics = create_brute_force_statistics(starting_word)
         return brute_force_statistics
@@ -61,7 +73,9 @@ def load_brute_force_statistics(starting_word):
         print(e)
         return None
 
+
 def load_letter_heatmap():
+    """Loads or creates a letter heatmap."""
     # Check if the graph image exists
     if os.path.exists(f'Data/Graphs/letter_heatmap.png'):
         # Load the graph image
@@ -79,10 +93,9 @@ def load_letter_heatmap():
 
 
 def display_graph(graph_image, frame):
+    """Display the graph image in the specified frame."""
     # Clear previous contents of the frame (if any)
-    for widget in frame.winfo_children():
-        widget.destroy()
-
+    clear_frame(frame)
     # Create a label to display the graph image
     graph_label = tk.Label(frame, image=graph_image)
     graph_label.image = graph_image  # Keep reference to prevent garbage collection
@@ -90,9 +103,9 @@ def display_graph(graph_image, frame):
 
 
 def display_ranking_list(ranking_list, amount_of_words, frame):
+    """Display the ranking list in the specified frame."""
     # Clear previous contents of the frame (if any)
-    for widget in frame.winfo_children():
-        widget.destroy()
+    clear_frame(frame)
 
     # Create a label for the ranking title
     title_label = tk.Label(frame, text="Ranking:", bg='#D9D9D9', font=('Inter', 30, "bold"),
@@ -119,23 +132,16 @@ def display_ranking_list(ranking_list, amount_of_words, frame):
 
 
 def display_general_statistics(general_statistics, brute_force_statistics):
+    """Display the general statistics in the specified frame."""
     # Clear previous contents of the frame (if any)
-    for widget in top_rectangle1.winfo_children():
-        widget.destroy()
-
-    for widget in top_rectangle2.winfo_children():
-        widget.destroy()
-
-    for widget in top_rectangle3.winfo_children():
-        widget.destroy()
-
-    for widget in title_rectangle.winfo_children():
-        widget.destroy()
+    clear_frame(top_rectangle1)
+    clear_frame(top_rectangle2)
+    clear_frame(top_rectangle3)
+    clear_frame(title_rectangle)
 
     general_statistics = general_statistics
     brute_force_statistics = brute_force_statistics
     percentage_of_words_eliminated = round((general_statistics[5] - general_statistics[3]) / general_statistics[5] * 100, 2)
-    percentage_of_words_eliminated_brute_force = round((brute_force_statistics[5] - brute_force_statistics[3]) / brute_force_statistics[5] * 100, 2)
 
     # Create a label for the statistics title
     title_label = tk.Label(title_rectangle, text="General statistics(Minimax vs Brute Force):", bg='#D9D9D9', font=('Inter', 20, "bold"),
@@ -148,21 +154,21 @@ def display_general_statistics(general_statistics, brute_force_statistics):
                                 bg='#D9D9D9', font=('Inter', 10, "italic"), anchor='w', justify='left')
     statistic1_label.pack(fill="x", pady=5, padx=10)
 
-    statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {percentage_of_words_eliminated}%, {percentage_of_words_eliminated_brute_force}%, Δ is {percentage_of_words_eliminated_brute_force - percentage_of_words_eliminated}%\n"
+    statistic2_label = tk.Label(top_rectangle2, text=f"Starting word eliminations: {percentage_of_words_eliminated}% or {general_statistics[3]} words left\n"
                                 f"Median number of turns: {general_statistics[2]}, {brute_force_statistics[2]}, Δ is {brute_force_statistics[2] - general_statistics[2]} turns",
                                 bg='#D9D9D9', font=('Inter', 10, "italic"), anchor='w', justify='left')
     statistic2_label.pack(fill="x", pady=5, padx=10)
 
-    statistic3_label = tk.Label(top_rectangle3, text=f"Execution time per game: {round(general_statistics[6], 3)}s, {round(brute_force_statistics[6],3)}s, Δ is {round(brute_force_statistics[6],3) - round(general_statistics[6], 3)}s\n"
-                                f"Total execution time: {round(general_statistics[4])}s, {round(brute_force_statistics[4])}s, Δ is {round(brute_force_statistics[4]) - round(general_statistics[4])}s\n",
+    statistic3_label = tk.Label(top_rectangle3, text=f"Execution time per game: {round(general_statistics[6], 3)}s, {round(brute_force_statistics[6], 3)}s, Δ is {round(general_statistics[6], 3) - round(brute_force_statistics[6], 3)}s\n"
+                                f"Total execution time: {round(general_statistics[4])}s, {round(brute_force_statistics[4])}s, Δ is {round(general_statistics[4]) - round(brute_force_statistics[4])}s\n",
                                 bg='#D9D9D9', font=('Inter', 10, "italic"), anchor='w', justify='left')
     statistic3_label.pack(fill="x", pady=5, padx=10)
 
 
 def display_letter_heatmap(letter_heatmap):
+    """Display the letter heatmap in the specified frame."""
     # Clear previous contents of the frame (if any)
-    for widget in rectangle3.winfo_children():
-        widget.destroy()
+    clear_frame(rectangle3)
 
     # Create a label to display the graph image
     graph_label = tk.Label(rectangle3, image=letter_heatmap)
@@ -171,10 +177,11 @@ def display_letter_heatmap(letter_heatmap):
 
 
 def on_enter(event):
+    """Run the algorithm when the Enter key is pressed."""
     starting_word = starting_word_entry.get()
     starting_word = starting_word.capitalize()
 
-    # check if the starting word is 5 characters long
+    # check if the starting word is 5 characters long and if it isn't stop the function
     if len(starting_word) != 5:
         return
 
@@ -235,6 +242,7 @@ def on_enter(event):
     starting_word_entry.config(fg='#4d4d4d')
 
 
+"""Application starts here"""
 # Create the main window
 root = tk.Tk()
 root.title("WordleSolver")

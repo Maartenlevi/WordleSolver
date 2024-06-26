@@ -1,11 +1,10 @@
-from Algorithm import compare_wordle, filter_possible_words, get_all_words
+from MiniMax import compare_wordle, filter_possible_words, get_all_words
 from database_connection import connect, close
 import time
-import random
 
 
 def get_guess(possible_words):
-    return random.choice(possible_words)
+    return possible_words[0]
 
 
 def brute_force(starting_words):

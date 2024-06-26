@@ -1,6 +1,18 @@
 from database_connection import connect, close
 
+
 def get_letter_frequency(letter):
+    """
+    Get the frequency of a letter in each position of a word.
+
+    Args:
+    - letter: The letter to get the frequency of.
+
+    Returns:
+    - letter_frequency: A list of the frequency of the letter in each position of a word.
+    """
+
+    # make sure the letter is lowercase
     letter = letter.lower()
     # do a query to get the frequency of the letter in 1st position then 2nd position etc.
     conn, cursor = connect()
@@ -30,7 +42,19 @@ def get_letter_frequency(letter):
 
     return letter_frequency
 
+
 def insert_data(letter, letter_frequency):
+    """
+    Insert the frequency of a letter in each position of a word into the database.
+
+    Args:
+    - letter: The letter to insert the frequency of.
+    - letter_frequency: A list of the frequency of the letter in each position of a word.
+
+    Returns:
+    - None
+    """
+
     # do a query to insert the data into the database
     conn, cursor = connect()
     cursor.execute("""
@@ -46,7 +70,17 @@ def insert_data(letter, letter_frequency):
 
     close(conn)
 
+
 def create_letter_frequency():
+    """
+    Create the letter frequency table.
+
+    Args:
+    - None
+
+    Returns:
+    - None
+    """
     # get all the letters
     letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
@@ -63,6 +97,7 @@ def create_letter_frequency():
         else:
             print(f"The letter '{letter}' is already in the database.")
         close(conn)
+
 
 # Run the function to create the letter frequency table
 create_letter_frequency()

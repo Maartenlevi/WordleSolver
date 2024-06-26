@@ -1,7 +1,7 @@
 from database_connection import connect, close
 import matplotlib.pyplot as plt
 import os
-from Algorithm import algorithm
+from MiniMax import algorithm
 from Brute_force import brute_force
 
 # Define Wordle colors
@@ -11,6 +11,15 @@ wordle_gray = '#D9D9D9'
 
 
 def create_general_statistics(starting_word):
+    """
+    Create a list with the general statistics of the starting word
+
+    Args:
+    - starting_word: The starting word to get the statistics from
+
+    Returns:
+    - A list with the general statistics of the starting word
+    """
     # make sure the first letter is uppercase
     starting_word = starting_word.capitalize()
 
@@ -39,6 +48,15 @@ def create_general_statistics(starting_word):
 
 
 def create_brute_force_statistics(starting_word):
+    """
+    Create a list with the brute force statistics of the starting word
+
+    Args:
+    - starting_word: The starting word to get the statistics from
+
+    Returns:
+    - A list with the brute force statistics of the starting word
+    """
     # make sure the first letter is uppercase
     starting_word = starting_word.capitalize()
 
@@ -66,6 +84,15 @@ def create_brute_force_statistics(starting_word):
     return brute_force_statistics
 
 def create_ranking(starting_word):
+    """
+    Create a list with the ranking of the starting word and the amount of words in the database
+
+    Args:
+    - starting_word: The starting word to get the ranking from
+
+    Returns:
+    - A list with the ranking of the starting word and the amount of words in the database
+    """
     conn, cursor = connect()
 
     # Get the ranking of all starting words
@@ -111,6 +138,16 @@ def create_ranking(starting_word):
 
 
 def create_wins_on_turns_graph(data, starting_word):
+    """
+    Create a bar chart with the number of wins for each turn and the average number of turns
+
+    Args:
+    - data: The data to create the graph from
+    - starting_word: The starting word to get the statistics from
+
+    Returns:
+    - None
+    """
     # Get the number of wins for each turn
     wins = {1: data[8], 2: data[9], 3: data[10], 4: data[11], 5: data[12], 6: data[13]}
     turns = list(wins.keys())
@@ -159,6 +196,15 @@ def create_wins_on_turns_graph(data, starting_word):
 
 
 def create_letter_heatmap():
+    """
+    Create a heatmap with the frequency of letters in each position
+
+    Args:
+    - None
+
+    Returns:
+    - None
+    """
     # get the information from the database
     conn, cursor = connect()
     cursor.execute("SELECT * FROM statistics2")
@@ -208,6 +254,15 @@ def create_letter_heatmap():
 
 
 def create_graphs(starting_word):
+    """
+    Create the graphs for the starting word
+
+    Args:
+    - starting_word: The starting word to get the statistics from
+
+    Returns:
+    - None
+    """
     # make sure the first letter is uppercase
     starting_word = starting_word.capitalize()
 

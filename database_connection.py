@@ -14,6 +14,16 @@ DB_PORT = os.getenv('DB_PORT')
 
 
 def connect():
+    """
+    Connect to the PostgreSQL database.
+
+    Args:
+    - None
+
+    Returns:
+    - conn: psycopg2 connection object for database operations.
+    - cursor: psycopg2 cursor object for database operations.
+    """
     # Connect to the PostgreSQL database
     conn = psycopg2.connect(
         host=DB_HOST,
@@ -27,5 +37,14 @@ def connect():
 
 
 def close(conn):
+    """
+    Close the connection to the PostgreSQL database.
+
+    Args:
+    - conn: psycopg2 connection object for database operations.
+
+    Returns:
+    - None
+    """
     # Close the connection
     conn.close()
