@@ -1,0 +1,56 @@
+CREATE TABLE words
+(
+    id integer primary key,
+    word character varying(5) unique,
+    letter1 character(1),
+    letter2 character(1),
+    letter3 character(1),
+    letter4 character(1),
+    letter5 character(1)
+);
+
+CREATE TABLE statistics
+(
+    starting_word character varying(5) primary key,
+    win_rate numeric(5,2) NOT NULL,
+    average_turns numeric(5,2) NOT NULL,
+    median_turns integer NOT NULL,
+    starting_word_eliminations integer NOT NULL,
+    execution_time numeric(10,6) NOT NULL,
+    total_games integer NOT NULL,
+    wins integer NOT NULL,
+    wins_turn_1 integer DEFAULT 0,
+    wins_turn_2 integer DEFAULT 0,
+    wins_turn_3 integer DEFAULT 0,
+    wins_turn_4 integer DEFAULT 0,
+    wins_turn_5 integer DEFAULT 0,
+    wins_turn_6 integer DEFAULT 0
+);
+
+CREATE TABLE brute_force_statistics
+(
+    starting_word character varying(5) primary key,
+    win_rate numeric(5,2) NOT NULL,
+    average_turns numeric(5,2) NOT NULL,
+    median_turns integer NOT NULL,
+    starting_word_eliminations integer NOT NULL,
+    execution_time numeric(10,6) NOT NULL,
+    total_games integer NOT NULL,
+    wins integer NOT NULL,
+    wins_turn_1 integer DEFAULT 0,
+    wins_turn_2 integer DEFAULT 0,
+    wins_turn_3 integer DEFAULT 0,
+    wins_turn_4 integer DEFAULT 0,
+    wins_turn_5 integer DEFAULT 0,
+    wins_turn_6 integer DEFAULT 0
+);
+
+CREATE TABLE statistics2
+(
+    letter character(1) primary key,
+    position1 integer DEFAULT 0,
+    position2 integer DEFAULT 0,
+    position3 integer DEFAULT 0,
+    position4 integer DEFAULT 0,
+    position5 integer DEFAULT 0
+);
